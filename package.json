@@ -6,8 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint .",
-    "start": "nodemon app.js",
-    "dev": "nodemon app.js"
+    "start": "node app.js"
   },
   "author": "Joshua Smith",
   "license": "ISC",
@@ -21,6 +20,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",
-    "prettier": "^3.0.3"
+    "prettier": "^3.0.3",
+    "dev": "nodemon app.js"
   }
 }

@@ -2,50 +2,26 @@ const ClothingItem = require("../models/clothingItem");
 const { invalidData, notFound, serverError } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  const { name, weather, imageURL, likes } = req.body;
+  const { name, weather, imageUrl, likes } = req.body;
   const owner = req.user._id;
 
-  ClothingItem.create({ name, weather, imageURL, likes, owner })
+  ClothingItem.create({ name, weather, imageUrl, likes, owner })
     .then((item) => {
-      res.status(200).send({ data: item });
+      res.send({ data: item });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(invalidData).send({ message: "Invalid data entry" });
       }
-      res.status(serverError).send({ message: "Error from createItem", err });
+      return res.status(serverError).send({ message: "Error from createItem"});
     });
 };
 
 const getItems = (req, res) => {
   ClothingItem.find({})
-    .then((items) => res.status(200).send(items))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(invalidData).send({ message: "Invalid request" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found" });
-      }
-      res.status(serverError).send({ message: "Error from getItems", err });
-    });
-};
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageURL } = req.body;
-
-  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((err) => {
-      if (err.name === "Validation") {
-        return res.status(invalidData).send({ message: "Invalid data entry" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found" });
-      }
-      res.status(serverError).send({ message: "Error from updateItem", err });
+    .then((items) => res.send(items))
+    .catch(() => {
+      res.status(serverError).send({ message: "Error from getItems"});
     });
 };
 
@@ -53,15 +29,15 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.status(204).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(invalidData).send({ message: "Invalid data entry" });
-      }
+      if (err.name === 'CastError') {
+       return res.status(invalidData).send({message: "Invalid data entry"})
+   }
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: "Info not found" });
       }
-      res.status(serverError).send({ message: "Error from deleteItem", err });
+      return res.status(serverError).send({ message: "Error from deleteItem"});
     });
 };
 
@@ -73,14 +49,9 @@ const likeClothingItem = (req, res) => {
   )
     .orFail()
     .then((clothingItem) => {
-      res.status(200).send({ data: clothingItem });
+      res.send({ data: clothingItem });
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res
-          .status(invalidData)
-          .send({ message: "this data is not valid" });
-      }
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: "Document not found" });
       }
@@ -101,7 +72,7 @@ const unlikeClothingItem = (req, res) => {
   )
     .orFail()
     .then((clothingItem) => {
-      res.status(200).send({ data: clothingItem });
+      res.send({ data: clothingItem });
     })
     .catch((err) => {
       if (err.name === "CastError") {
@@ -119,7 +90,6 @@ const unlikeClothingItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  updateItem,
   deleteItem,
   likeClothingItem,
   unlikeClothingItem,
