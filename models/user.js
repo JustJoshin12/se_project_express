@@ -1,21 +1,21 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
 const user = new mongoose.Schema({
   name: {
     type: String,
     required: true,
     minLength: 2,
-    maxLength: 30
+    maxLength: 30,
   },
   avatar: {
     type: String,
     required: true,
-    validator: {
+    validate: {
       validator: (v) => validator.isURL(v),
-      message: 'Link is not Valid',
+      message: "You must enter a valid URL",
     },
-  }
-})
+  },
+});
 
-module.exports = mongoose.model('user', user);
+module.exports = mongoose.model("user", user);

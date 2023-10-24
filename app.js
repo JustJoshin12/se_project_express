@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 const app = express();
+
 const { PORT = 3001 } = process.env;
 
 mongoose.connect(
@@ -15,14 +16,15 @@ mongoose.connect(
 const routes = require("./routes");
 
 app.use(express.json());
-app.use(routes);
+
 app.use((req, res, next) => {
   req.user = {
-    _id: "653367125044d986e336644c"
+    _id: "6534251d44a4639d88bd61ce",
   };
   next();
 });
 
+app.use(routes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
