@@ -17,13 +17,6 @@ const routes = require("./routes");
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "6534251d44a4639d88bd61ce",
-  };
-  next();
-});
-
 app.use(routes);
 
 app.listen(PORT, () => {

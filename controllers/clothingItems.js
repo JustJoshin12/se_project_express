@@ -1,5 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
-const { invalidData, notFound, serverError } = require("../utils/errors");
+const { invalidData, notFound, serverError, forbidden } = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl, likes } = req.body;
@@ -13,7 +13,7 @@ const createItem = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(invalidData).send({ message: "Invalid data entry" });
       }
-      return res.status(serverError).send({ message: "Error from createItem"});
+      return res.status(serverError).send({ message: "Error from createItem" });
     });
 };
 
@@ -21,23 +21,30 @@ const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.send(items))
     .catch(() => {
-      res.status(serverError).send({ message: "Error from getItems"});
+      res.status(serverError).send({ message: "Error from getItems" });
     });
 };
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
+
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => res.send({ data: item }))
+    .then((item) => {
+      if (userId !== item.owner.toString()) {
+        return res.status(forbidden).send({ message: "Access denied" });
+      }
+      res.send({ data: item });
+    })
     .catch((err) => {
-      if (err.name === 'CastError') {
-       return res.status(invalidData).send({message: "Invalid data entry"})
-   }
+      if (err.name === "CastError") {
+        return res.status(invalidData).send({ message: "Invalid data entry" });
+      }
       if (err.name === "DocumentNotFoundError") {
         return res.status(notFound).send({ message: "Info not found" });
       }
-      return res.status(serverError).send({ message: "Error from deleteItem"});
+      return res.status(serverError).send({ message: "Error from deleteItem" });
     });
 };
 
