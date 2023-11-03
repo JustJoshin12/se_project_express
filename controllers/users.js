@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {
   invalidData,
@@ -15,13 +15,15 @@ const createUser = (req, res) => {
 
   User.findOne({ email }).then((user) => {
     if (user) {
-      return res.status(duplicateData).send({message: "User information already exist."});
+      return res
+        .status(duplicateData)
+        .send({ message: "User information already exist." });
     }
 
     bcrypt.hash(password, 10).then((hash) => {
       User.create({ name, avatar, email, password: hash })
         .then((user) => {
-          res.send({ data: user });
+          res.send({ message: "successful" });
         })
         .catch((err) => {
           if (err.name === "ValidationError") {
@@ -29,23 +31,12 @@ const createUser = (req, res) => {
               .status(invalidData)
               .send({ message: "Invalid data entry" });
           }
-          if (err.name === "CastError") {
-            return res.status(invalidData).send({ message: "Invalid ID" });
-          }
           return res
             .status(serverError)
             .send({ message: "Error from createUser" });
         });
     });
   });
-};
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((user) => res.send({ data: user }))
-    .catch(() => {
-      res.status(serverError).send({ message: "Error from getUsers" });
-    });
 };
 
 const getUser = (req, res) => {
@@ -66,7 +57,7 @@ const getUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error("incorrect username or password"));
@@ -90,7 +81,23 @@ const getCurrentUser = (req, res) => {
       res.status(OK).send(user);
     })
     .catch((err) => {
-      handleUserHttpError(req, res, err);
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        return res.status(invalidData).send({ message: "Invalid data entry" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: "Info not found" });
+      }
+      return res.status(serverError).send({ message: "Error from getUser" });
+    });
+};
+
+const getUsers = (req, res) => {
+  User.find({})
+    .then((users) => {
+      res.status(200).send(users);
+    })
+    .catch((err) => {
+      handleError(req, res, err);
     });
 };
 
@@ -104,15 +111,18 @@ const updateProfile = (req, res) => {
       res.status(OK).send({ user });
     })
     .catch((err) => {
-      handleUserHttpError(req, res, err);
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        return res.status(invalidData).send({ message: "Invalid data entry" });
+      }
+      return res.status(serverError).send({ message: "Error from getUser" });
     });
 };
 
 module.exports = {
   createUser,
-  getUsers,
   getUser,
   login,
   getCurrentUser,
   updateProfile,
+  getUsers,
 };
