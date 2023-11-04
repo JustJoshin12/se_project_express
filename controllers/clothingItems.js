@@ -1,5 +1,10 @@
 const ClothingItem = require("../models/clothingItem");
-const { invalidData, notFound, serverError, forbidden } = require("../utils/errors");
+const {
+  invalidData,
+  notFound,
+  serverError,
+  forbidden,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl, likes } = req.body;

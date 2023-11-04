@@ -13,11 +13,18 @@ const { JWT_SECRET } = require("../utils/config");
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  User.findOne({ email }).then((user) => {
+  if (!email) {
+    return res
+      .status(invalidData)
+      .send({ message: "Please include an email " });
+  }
+
+  User.findOne({ email })
+  .then((user) => {
     if (user) {
       return res
         .status(duplicateData)
-        .send({ message: "User information already exist." });
+        .send({ message: "a user with that email already exists." });
     }
 
     bcrypt.hash(password, 10).then((hash) => {
@@ -30,6 +37,8 @@ const createUser = (req, res) => {
             return res
               .status(invalidData)
               .send({ message: "Invalid data entry" });
+          } else if (err.code === 1100) {
+            res.status(duplicateData).send({ message: "Email already exist" });
           }
           return res
             .status(serverError)
@@ -37,21 +46,6 @@ const createUser = (req, res) => {
         });
     });
   });
-};
-
-const getUser = (req, res) => {
-  User.findById(req.params.userId)
-    .orFail()
-    .then((user) => res.send({ data: user }))
-    .catch((err) => {
-      if (err.name === "ValidationError" || err.name === "CastError") {
-        return res.status(invalidData).send({ message: "Invalid data entry" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found" });
-      }
-      return res.status(serverError).send({ message: "Error from getUser" });
-    });
 };
 
 const login = (req, res) => {
@@ -91,16 +85,6 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => {
-      res.status(200).send(users);
-    })
-    .catch((err) => {
-      handleError(req, res, err);
-    });
-};
-
 const updateProfile = (req, res) => {
   User.findOneAndUpdate(req.user._id, req.body, {
     new: true,
@@ -108,7 +92,7 @@ const updateProfile = (req, res) => {
   })
     .orFail()
     .then((user) => {
-      res.status(OK).send({ user });
+      res.send({ user });
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
@@ -120,9 +104,7 @@ const updateProfile = (req, res) => {
 
 module.exports = {
   createUser,
-  getUser,
   login,
   getCurrentUser,
   updateProfile,
-  getUsers,
 };
