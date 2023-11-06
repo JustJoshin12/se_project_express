@@ -1,6 +1,6 @@
-const User = require("../models/user");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const users = require("../models/user");
 const {
   invalidData,
   notFound,
@@ -19,25 +19,25 @@ const createUser = (req, res) => {
       .send({ message: "Please include an email " });
   }
 
-  User.findOne({ email })
-  .then((user) => {
+  return users.findOne({ email }).then((user) => {
     if (user) {
       return res
         .status(duplicateData)
-        .send({ message: "a user with that email already exists." });
+        .send({ message: "A user with that email already exists." });
     }
 
     bcrypt.hash(password, 10).then((hash) => {
-      User.create({ name, avatar, email, password: hash })
-        .then((user) => {
-          res.send({ message: "successful" });
+      users.create({ name, avatar, email, password: hash })
+        .then((data) => {
+          res.send({ message: data });
         })
         .catch((err) => {
           if (err.name === "ValidationError") {
             return res
               .status(invalidData)
               .send({ message: "Invalid data entry" });
-          } else if (err.code === 1100) {
+          }
+          if (err.code === 11000) {
             res.status(duplicateData).send({ message: "Email already exist" });
           }
           return res
@@ -51,7 +51,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  return users.findUserByCredentials(email, password)
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error("incorrect username or password"));
@@ -69,10 +69,10 @@ const login = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  users.findById(req.user._id)
     .orFail()
     .then((user) => {
-      res.status(OK).send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
@@ -86,13 +86,13 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  User.findOneAndUpdate(req.user._id, req.body, {
+  users.findOneAndUpdate(req.user._id, req.body, {
     new: true,
     runValidators: true,
   })
     .orFail()
     .then((user) => {
-      res.send({ user });
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {

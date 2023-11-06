@@ -1,8 +1,17 @@
+const invalidData = 400;
+const unauthorize = 401;
+const forbidden = 403;
+const notFound = 404;
+const duplicateData = 409;
+const serverError = 500;
+
+
+
 module.exports = {
-  notFound: 404,
-  serverError: 500,
-  invalidData: 400,
-  duplicateData: 409,
-  unauthorize: 401,
-  forbidden: 403,
+  notFound,
+  serverError,
+  invalidData,
+  duplicateData,
+  unauthorize,
+  forbidden,
 };

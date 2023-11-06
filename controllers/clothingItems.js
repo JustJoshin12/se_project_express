@@ -40,7 +40,7 @@ const deleteItem = (req, res) => {
       if (userId !== item.owner.toString()) {
         return res.status(forbidden).send({ message: "Access denied" });
       }
-      res.send({ data: item });
+      return res.send({ data: item });
     })
     .catch((err) => {
       if (err.name === "CastError") {
