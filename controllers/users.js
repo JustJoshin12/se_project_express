@@ -14,7 +14,7 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email) {
-    return res.status(invalidData).send({ message: "Please include an email" });
+    res.status(invalidData).send({ message: "Please include an email" });
   }
 
   return users
@@ -26,30 +26,25 @@ const createUser = (req, res) => {
           .send({ message: "A user with that email already exists." });
       }
 
-      bcrypt.hash(password, 10).then((hash) => {
+      return bcrypt.hash(password, 10)
+      .then((hash) => {
         users
           .create({ name, avatar, email, password: hash })
-          .then((data) => {
-            return res.send({
-              name: data.name,
-              avatar: data.avatar,
-              email: data.email,
-             });
-          })
+          .then((data) => res.send({
+            name: data.name,
+            avatar: data.avatar,
+            email: data.email,
+          }))
           .catch((err) => {
             if (err.name === "ValidationError") {
-              return res
-                .status(invalidData)
-                .send({ message: "Invalid data entry" });
+              res.status(invalidData).send({ message: "Invalid data entry" });
             }
             if (err.code === 11000) {
               res
                 .status(duplicateData)
                 .send({ message: "Email already exist" });
             }
-            return res
-              .status(serverError)
-              .send({ message: "Error from createUser" });
+            res.status(serverError).send({ message: "Error from createUser" });
           });
       });
     })
@@ -99,10 +94,14 @@ const getCurrentUser = (req, res) => {
 
 const updateProfile = (req, res) => {
   users
-    .findOneAndUpdate({ _id: req.user._id }, { name: req.body.name, avatar: req.body.avatar }, {
-      new: true,
-      runValidators: true,
-    })
+    .findOneAndUpdate(
+      { _id: req.user._id },
+      { name: req.body.name, avatar: req.body.avatar },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
     .orFail()
     .then((user) => {
       res.send(user);
@@ -111,8 +110,8 @@ const updateProfile = (req, res) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         return res.status(invalidData).send({ message: "Invalid data entry" });
       }
-      if(err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found"});
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(notFound).send({ message: "Info not found" });
       }
       return res.status(serverError).send({ message: "Error from getUser" });
     });
