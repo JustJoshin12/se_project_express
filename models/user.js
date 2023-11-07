@@ -39,17 +39,17 @@ users.statics.findUserByCredentials = function findUserByCredentials(
 ) {
   return this.findOne( email )
     .select("+password")
-    .then((user) => {
-      if (!user) {
+    .then((data) => {
+      if (!data) {
         return Promise.reject(new Error("Incorrect email or password"));
       }
 
-      return bcrypt.compare(password, user.password).then((matched) => {
+      return bcrypt.compare(password, data.password).then((matched) => {
         if (!matched) {
           return Promise.reject(new Error("Incorrect email or password"));
         }
 
-        return user;
+        return data;
       });
     });
 };

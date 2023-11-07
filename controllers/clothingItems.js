@@ -34,13 +34,13 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
     .then((item) => {
       if (userId !== item.owner.toString()) {
         return res.status(forbidden).send({ message: "Access denied" });
       }
-      return res.send({ data: item });
+      return item.deleteOne().then(() => res.send({ message: "Item deleted"}));
     })
     .catch((err) => {
       if (err.name === "CastError") {
