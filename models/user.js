@@ -37,7 +37,7 @@ users.statics.findUserByCredentials = function findUserByCredentials(
   email,
   password,
 ) {
-  return this.findOne( email )
+  return this.findOne({ email })
     .select("+password")
     .then((data) => {
       if (!data) {

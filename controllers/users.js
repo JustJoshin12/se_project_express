@@ -99,7 +99,7 @@ const getCurrentUser = (req, res) => {
 
 const updateProfile = (req, res) => {
   users
-    .findOneAndUpdate(req.user._id, { name: req.body.name, avatar: req.body.avatar }, {
+    .findOneAndUpdate({ _id: req.user._id }, { name: req.body.name, avatar: req.body.avatar }, {
       new: true,
       runValidators: true,
     })
