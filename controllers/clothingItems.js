@@ -12,7 +12,7 @@ const createItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, likes, owner })
     .then((item) => {
-      res.send({ data: item });
+      res.send( item );
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -61,7 +61,7 @@ const likeClothingItem = (req, res) => {
   )
     .orFail()
     .then((clothingItem) => {
-      res.send({ data: clothingItem });
+      res.send( clothingItem );
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
@@ -84,7 +84,7 @@ const unlikeClothingItem = (req, res) => {
   )
     .orFail()
     .then((clothingItem) => {
-      res.send({ data: clothingItem });
+      res.send( clothingItem);
     })
     .catch((err) => {
       if (err.name === "CastError") {
