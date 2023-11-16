@@ -50,7 +50,7 @@ const createUser = (req, res) => {
     })
     .catch(() => {
       res.status(serverError).send({ message: "Error from createUser" });
-    });
+    })
 };
 
 const login = (req, res) => {
