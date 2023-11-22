@@ -1,6 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const errorHandler = require("./middleware/error-handler");
+const { errors } = require("celebrate");
+const { requestLogger, errorLogger } = require("./middleware/logger");
 
 const app = express();
 
@@ -18,8 +21,11 @@ const routes = require("./routes");
 
 app.use(express.json());
 app.use(cors());
+app.use(requestLogger);
 app.use(routes);
-
+app.use(errorLogger);
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

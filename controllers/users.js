@@ -1,29 +1,24 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const users = require("../models/user");
-const {
-  invalidData,
-  notFound,
-  serverError,
-  duplicateData,
-  unauthorize,
-} = require("../utils/errors");
+const BadRequestError = require("../errors/bad-request-error");
+const UnauthorizedError = require("../errors/unauthorize-error");
+const NotFoundError = require("../errors/not-found-error");
+const ConflictError = require("../errors/conflict-error");
 const { JWT_SECRET } = require("../utils/config");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email) {
-    res.status(invalidData).send({ message: "Please include an email" });
+    return next(new BadRequestError("Please include an email"));
   }
 
   return users
     .findOne({ email })
     .then((user) => {
       if (user) {
-        return res
-          .status(duplicateData)
-          .send({ message: "A user with that email already exists." });
+        return next(new ConflictError("A user with this email already exists."))
       }
 
       return bcrypt.hash(password, 10)
@@ -37,23 +32,21 @@ const createUser = (req, res) => {
           }))
           .catch((err) => {
             if (err.name === "ValidationError") {
-              res.status(invalidData).send({ message: "Invalid data entry" });
+              return next(new BadRequestError("Invalid data entry"))
             }
             if (err.code === 11000) {
-              res
-                .status(duplicateData)
-                .send({ message: "Email already exist" });
+              return next(new ConflictError("Email already exist"))
             }
-            res.status(serverError).send({ message: "Error from createUser" });
+           next(err)
           });
       });
     })
-    .catch(() => {
-      res.status(serverError).send({ message: "Error from createUser" });
+    .catch((err) => {
+      next(err)
     })
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return users
@@ -70,11 +63,12 @@ const login = (req, res) => {
       return res.send({ token });
     })
     .catch((err) => {
-      res.status(unauthorize).send({ message: err.message });
+      console.error(err);
+      return next(new UnauthorizedError("Unauthorize"));
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   users
     .findById(req.user._id)
     .orFail()
@@ -83,16 +77,16 @@ const getCurrentUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res.status(invalidData).send({ message: "Invalid data entry" });
+        return next(new BadRequestError("Invalid data entry"))
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found" });
+        return next(new NotFoundError("Info not found"));
       }
-      return res.status(serverError).send({ message: "Error from getUser" });
+      next(err)
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const {name, avatar} = req.body;
   const userId = req.user._id;
   users
@@ -109,12 +103,12 @@ const updateProfile = (req, res) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return res.status(invalidData).send({ message: "Invalid data entry" });
+        return next(new BadRequestError("Invalid data entry"))
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(notFound).send({ message: "Info not found" });
+        return next(new NotFoundError("Info not found"))
       }
-      return res.status(serverError).send({ message: "Error from getUser" });
+      next(err);
     });
 };
 
