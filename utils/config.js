@@ -1,3 +1,3 @@
-const { JWT_SECRET = "triple-ten-2023" } = process.env;
+const { JWT_SECRET, NODE_ENV, } = process.env;
 
-module.exports = { JWT_SECRET };
+module.exports = { JWT_SECRET, NODE_ENV };

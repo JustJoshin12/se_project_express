@@ -5,7 +5,7 @@ const BadRequestError = require("../errors/bad-request-error");
 const UnauthorizedError = require("../errors/unauthorize-error");
 const NotFoundError = require("../errors/not-found-error");
 const ConflictError = require("../errors/conflict-error");
-const { JWT_SECRET } = require("../utils/config");
+const { JWT_SECRET, NODE_ENV } = require("../utils/config");
 
 const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
@@ -56,7 +56,7 @@ const login = (req, res, next) => {
         return Promise.reject(new Error("incorrect username or password"));
       }
 
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : JWT_SECRET, {
         expiresIn: "7d",
       });
 
