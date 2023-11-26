@@ -18,7 +18,7 @@ const createUser = (req, res, next) => {
     .findOne({ email })
     .then((user) => {
       if (user) {
-        return next(new ConflictError("A user with this email already exists."))
+         next(new ConflictError("A user with this email already exists."))
       }
 
       return bcrypt.hash(password, 10)
@@ -32,10 +32,10 @@ const createUser = (req, res, next) => {
           }))
           .catch((err) => {
             if (err.name === "ValidationError") {
-              return next(new BadRequestError("Invalid data entry"))
+               next(new BadRequestError("Invalid data entry"))
             }
             if (err.code === 11000) {
-              return next(new ConflictError("Email already exist"))
+               next(new ConflictError("Email already exist"))
             }
            next(err)
           });
@@ -64,7 +64,7 @@ const login = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      return next(new UnauthorizedError("Unauthorize"));
+       next(new UnauthorizedError("Unauthorize"));
     });
 };
 
@@ -77,10 +77,10 @@ const getCurrentUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return next(new BadRequestError("Invalid data entry"))
+        next(new BadRequestError("Invalid data entry"))
       }
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("Info not found"));
+        next(new NotFoundError("Info not found"));
       }
       next(err)
     });
@@ -103,10 +103,10 @@ const updateProfile = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
-        return next(new BadRequestError("Invalid data entry"))
+        next(new BadRequestError("Invalid data entry"))
       }
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("Info not found"))
+        next(new NotFoundError("Info not found"))
       }
       next(err);
     });

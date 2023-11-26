@@ -1,8 +1,7 @@
 const ClothingItem = require("../models/clothingItem");
 const BadRequestError = require("../errors/bad-request-error");
-const UnauthorizedError = require("../errors/unauthorize-error");
 const NotFoundError = require("../errors/not-found-error");
-
+const ForbiddenError = require("../errors/forbidden-error")
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl, likes } = req.body;
@@ -14,7 +13,7 @@ const createItem = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-       return next(new BadRequestError("Bad Request"));
+        next(new BadRequestError("Bad Request"));
       }
         next(err)
 
@@ -37,16 +36,16 @@ const deleteItem = (req, res, next) => {
     .orFail()
     .then((item) => {
       if (userId !== item.owner.toString()) {
-        return next(new UnauthorizedError("Not authorize"));
+         next(new ForbiddenError("Forbidden"));
       }
       return item.deleteOne().then(() => res.send({ message: "Item deleted"}));
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return next(new BadRequestError("Invalid data entry"))
+        next(new BadRequestError("Invalid data entry"))
       }
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("Info not found"));
+       next(new NotFoundError("Info not found"));
       }
       next(err);
     });
@@ -64,10 +63,10 @@ const likeClothingItem = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("Document not found"));
+         next(new NotFoundError("Document not found"));
       }
       if (err.name === "CastError") {
-        return next(new BadRequestError("Invalid ID"));
+         next(new BadRequestError("Invalid ID"));
       }
       next(err);
     });
@@ -85,10 +84,10 @@ const unlikeClothingItem = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        return next(new BadRequestError("Invalid ID"));
+         next(new BadRequestError("Invalid ID"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return next(new NotFoundError("Document not found"));
+         next(new NotFoundError("Document not found"));
       }
       next(err);
     });
