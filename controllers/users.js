@@ -56,7 +56,7 @@ const login = (req, res, next) => {
         return Promise.reject(new Error("incorrect username or password"));
       }
 
-      const token = jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : JWT_SECRET, {
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === "production" ? JWT_SECRET : "dev-key", {
         expiresIn: "7d",
       });
 
