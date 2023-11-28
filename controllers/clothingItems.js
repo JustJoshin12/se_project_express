@@ -36,7 +36,7 @@ const deleteItem = (req, res, next) => {
     .orFail()
     .then((item) => {
       if (userId !== item.owner.toString()) {
-         next(new ForbiddenError("Forbidden"));
+        return next(new ForbiddenError("Forbidden"));
       }
       return item.deleteOne().then(() => res.send({ message: "Item deleted"}));
     })
